@@ -3,11 +3,14 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
-import * as compression from 'compression';
-import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+
+// esModuleInterop n'est pas activé dans tsconfig.json — require() évite
+// le TypeError sur les imports par défaut de ces modules CommonJS.
+const compression = require('compression');
+const cookieParser = require('cookie-parser');
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -19,7 +22,12 @@ async function bootstrap() {
   const appUrl = configService.get('APP_URL', 'http://localhost:3000');
 
   // Security middleware
-  app.use(helmet({ crossOriginEmbedderPolicy: false, contentSecurityPolicy: nodeEnv === 'production' }));
+  app.use(helmet({
+    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: nodeEnv === 'production',
+    // Permet au frontend (autre origine) de charger les images servies par /uploads
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }));
   app.use(compression());
   app.use(cookieParser());
 
@@ -67,12 +75,12 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, document, {
       swaggerOptions: { persistAuthorization: true, docExpansion: 'none' },
     });
-    logger.log(`📚 Swagger: http://localhost:${port}/api/docs`);
+    logger.log(` Swagger: http://localhost:${port}/api/docs`);
   }
 
   await app.listen(port, '0.0.0.0');
-  logger.log(`🚀 API running on port ${port} [${nodeEnv}]`);
-  logger.log(`🌍 API accessible on 0.0.0.0 and CORS allowed for ${appUrl}`);
+  logger.log(` API running on port ${port} [${nodeEnv}]`);
+  logger.log(` API accessible on 0.0.0.0 and CORS allowed for ${appUrl}`);
 }
 
 bootstrap();

@@ -1,4 +1,3 @@
-
 'use client';
 
 function TrustIcon({ type }: { type: string }) {
@@ -11,7 +10,7 @@ function TrustIcon({ type }: { type: string }) {
   return <span className="flex-shrink-0">{icons[type]}</span>;
 }
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -25,7 +24,9 @@ import { PAYMENT_METHODS } from '@/types/constants';
 // MODIFICATION 8: richer payment simulation states
 type PaymentStep = 'info' | 'payment' | 'processing' | 'success';
 
-export default function CheckoutPage({ params }: any) {
+export default function CheckoutPage({ params }: { params: Promise<{ productId: string }> }) {
+  const { productId } = use(params);
+
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -46,16 +47,16 @@ export default function CheckoutPage({ params }: any) {
 
   useEffect(() => {
     // BUG-007 fix: use public endpoint (no JWT)
-    api.get(`/products/public/${params.productId}`)
+    api.get(`/products/public/${productId}`)
       .then(r => setProduct(r.data))
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
-  }, [params.productId]);
+  }, [productId]);
 
   const createOrder = useMutation({
     mutationFn: (d: any) =>
       api.post('/orders', {
-        productId: params.productId,
+        productId,
         customerEmail: d.email,
         customerName: d.name,
         paymentMethod: selectedMethod,
@@ -195,7 +196,7 @@ export default function CheckoutPage({ params }: any) {
                 </div>
 
                 <div className="card border-yellow-200 bg-yellow-50 text-yellow-800 text-sm">
-                  ⚠️ Mode démonstration — le paiement est simulé. Aucun montant réel n'est débité.
+                   Mode démonstration — le paiement est simulé. Aucun montant réel n'est débité.
                 </div>
 
                 <button onClick={() => confirmPayment.mutate()} disabled={confirmPayment.isPending} className="btn-primary w-full text-base py-4">

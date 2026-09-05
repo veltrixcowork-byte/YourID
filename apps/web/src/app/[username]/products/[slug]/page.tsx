@@ -1,4 +1,3 @@
-
 function TrustBadgeIcon({ type }: { type: string }) {
   if (type === 'lock') return <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="6" width="10" height="7" rx="1.5" stroke="#00A86B" strokeWidth="1.2"/><path d="M4.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#00A86B" strokeWidth="1.2" strokeLinecap="round"/><circle cx="7" cy="9.5" r=".8" fill="#00A86B"/></svg>;
   if (type === 'flash') return <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8 2L4 8h4l-2 4 6-6H8z" fill="#F59E0B" opacity=".2" stroke="#F59E0B" strokeWidth="1.1" strokeLinejoin="round"/></svg>;
@@ -28,8 +27,13 @@ async function getProduct(slug: string) {
   } catch { return null; }
 }
 
-export async function generateMetadata({ params }: any) {
-  const p = await getProduct(params.slug);
+type PageProps = {
+  params: Promise<{ username: string; slug: string }>;
+};
+
+export async function generateMetadata({ params }: PageProps) {
+  const { slug } = await params;
+  const p = await getProduct(slug);
   if (!p) return { title: 'Produit introuvable' };
   return {
     title: `${p.title} – Your ID`,
@@ -42,12 +46,13 @@ export async function generateMetadata({ params }: any) {
   };
 }
 
-export default async function ProductPage({ params }: any) {
-  const product = await getProduct(params.slug);
+export default async function ProductPage({ params }: PageProps) {
+  const { slug, username: rawUsername } = await params;
+  const product = await getProduct(slug);
   if (!product) notFound();
 
   const typeInfo = PRODUCT_TYPES.find((t) => t.value === product.type);
-  const username = params.username.replace('@', '');
+  const username = rawUsername.replace('@', '');
 
   return (
     <div className="min-h-screen bg-background">
@@ -232,7 +237,7 @@ export default async function ProductPage({ params }: any) {
                     { icon: 'globe', text: 'Livré partout en Afrique' },
                   ].map((b, i) => (
                     <div key={i} className="flex items-center gap-2.5">
-                      <span className="text-base">{b.icon}</span>
+                      <TrustBadgeIcon type={b.icon} />
                       <span>{b.text}</span>
                     </div>
                   ))}

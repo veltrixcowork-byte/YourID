@@ -1,9 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Search } from 'lucide-react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import { PRODUCT_TYPES } from '@/types/constants';
@@ -12,7 +12,7 @@ import { IconStar } from '@/components/ui/svg-icons';
 
 // ─── Product type icon (inline SVG, no emoji) ─────────────────────────────────
 function ProductTypeIcon({ type, size = 20 }: { type: string; size?: number }) {
-  const cfg: Record<string, { color: string; path: React.ReactNode }> = {
+  const cfg: Record<string, { color: string; path: ReactNode }> = {
     EBOOK: {
       color: '#00A86B',
       path: <><rect x="3" y="2" width="14" height="18" rx="2" stroke="#00A86B" strokeWidth="1.4" fill="#00A86B" fillOpacity=".1"/>
@@ -74,12 +74,16 @@ function VerifiedBadge() {
 
 // ─── Product card ─────────────────────────────────────────────────────────────
 function ProductCard({ p }: { p: any }) {
+  const router = useRouter();
   const username = p.store?.username || p.store?.slug || 'store';
   return (
-    <Link href={`/@${username}/products/${p.slug}`} className="block">
+    <div onClick={() => router.push(`/@${username}/products/${p.slug}`)} className="block cursor-pointer">
       <motion.div whileHover={{ y: -3 }}
-        className="bg-white rounded-2xl border border-border overflow-hidden hover:shadow-soft transition-all group">
+        className="bg-white rounded-2xl border border-border overflow-hidden hover:shadow-soft transition-all group ring-1 ring-red-50">
         <div className="aspect-video bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
+          <div className="absolute top-2 left-2 bg-white/90 text-gray-900 text-xs px-2 py-1 rounded shadow-sm max-w-[160px] truncate">
+            {p.title}
+          </div>
           {p.coverImage ? (
             <img src={p.coverImage} alt={p.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
@@ -137,7 +141,7 @@ function ProductCard({ p }: { p: any }) {
           </div>
         </div>
       </motion.div>
-    </Link>
+    </div>
   );
 }
 
