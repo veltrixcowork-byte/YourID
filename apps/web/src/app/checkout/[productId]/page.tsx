@@ -154,15 +154,18 @@ export default function CheckoutPage({ params }: { params: Promise<{ productId: 
                   <div>
                     <label className="label">Méthode de paiement</label>
                     <div className="grid grid-cols-2 gap-2">
-                      {PAYMENT_METHODS.map(m => (
-                        <button key={m.id} type="button" onClick={() => setSelectedMethod(m.id)}
-                          className={`flex items-center gap-2.5 p-3 rounded-xl border-2 text-left transition-all ${selectedMethod === m.id ? 'border-brand-500 bg-brand-50' : 'border-border hover:border-brand-200'}`}>
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${m.color}20` }}>
-                            <span className="text-base">{m.emoji}</span>
-                          </div>
-                          <span className="text-sm font-medium text-gray-900 leading-tight">{m.name}</span>
-                        </button>
-                      ))}
+                      {PAYMENT_METHODS.map(m => {
+                        const MethodIcon = m.icon;
+                        return (
+                          <button key={m.id} type="button" onClick={() => setSelectedMethod(m.id)}
+                            className={`flex items-center gap-2.5 p-3 rounded-xl border-2 text-left transition-all ${selectedMethod === m.id ? 'border-brand-500 bg-brand-50' : 'border-border hover:border-brand-200'}`}>
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${m.color}20` }}>
+                              <MethodIcon size={16} className="text-gray-900" />
+                            </div>
+                            <span className="text-sm font-medium text-gray-900 leading-tight">{m.name}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -182,8 +185,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ productId: 
 
                 <div className="card border-0 bg-gradient-to-br from-brand-50 to-brand-100/50">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ backgroundColor: `${methodInfo?.color}20` }}>
-                      {methodInfo?.emoji}
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${methodInfo?.color}20` }}>
+                      {methodInfo && <methodInfo.icon size={18} className="text-gray-900" />}
                     </div>
                     <div>
                       <p className="font-bold text-gray-900 text-sm">{methodInfo?.name}</p>
@@ -217,7 +220,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ productId: 
                   </svg>
                   {/* Center icon */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-2xl">{methodInfo?.emoji}</span>
+                    {methodInfo && <methodInfo.icon size={28} className="text-gray-900" />}
                   </div>
                 </div>
 

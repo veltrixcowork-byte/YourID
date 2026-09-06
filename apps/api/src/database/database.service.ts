@@ -42,7 +42,6 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   private runMigrations() {
-    // Resolves schema.sql both in ts-node dev (src/) and compiled dist/ (via nest-cli assets copy)
     const candidates = [
       path.join(__dirname, 'schema.sql'),
       path.join(process.cwd(), 'dist', 'database', 'schema.sql'),
@@ -56,7 +55,6 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   private applySchemaFixes() {
-    // Ensure audit_logs table exists
     try {
       const auditExists = this.conn.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'audit_logs'").get();
       if (!auditExists) {
@@ -73,14 +71,11 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
           )
         `);
       }
-    } catch (e) {
+    } catch {
       // Table might already exist, ignore
     }
   }
 
-  // ─── Generic helpers ────────────────────────────────────────────────────
-
-  /** Generates a sortable, collision-resistant ID (replaces Prisma's cuid()). */
   id(): string {
     return `${Date.now().toString(36)}${crypto.randomBytes(8).toString('hex')}`;
   }
@@ -101,12 +96,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     return this.conn.prepare(sql).run(...params);
   }
 
-  /** Runs `fn` inside a SQLite transaction. Throwing inside `fn` rolls back automatically. */
   transaction<T>(fn: () => T): T {
     return this.conn.transaction(fn)();
   }
-
-  // ─── JSON helpers (SQLite has no native JSON column type) ──────────────
 
   toJson(value: unknown): string | null {
     if (value === undefined || value === null) return null;
@@ -121,8 +113,6 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       return null;
     }
   }
-
-  // ─── Boolean helpers (SQLite stores booleans as 0/1) ────────────────────
 
   toBool(value: number | null | undefined): boolean {
     return !!value;

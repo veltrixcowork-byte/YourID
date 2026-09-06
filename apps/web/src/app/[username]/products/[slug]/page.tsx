@@ -95,8 +95,9 @@ export default async function ProductPage({ params }: PageProps) {
                     {product.category.name}
                   </span>
                 )}
-                <span className="badge bg-gray-100 text-gray-600 text-xs">
-                  {typeInfo?.icon} {typeInfo?.label || product.type}
+                <span className="badge bg-gray-100 text-gray-600 text-xs inline-flex items-center gap-1.5">
+                  {typeInfo && <typeInfo.icon size={12} />}
+                  {typeInfo?.label || product.type}
                 </span>
               </div>
 

@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const path = require('path');
-
 const nextConfig = {
   reactStrictMode: true,
   images: {
@@ -13,14 +12,11 @@ const nextConfig = {
   },
   webpack(config) {
     const rootNodeModules = path.resolve(__dirname, '..', '..', 'node_modules');
-    config.resolve.modules = config.resolve.modules || [];
-    config.resolve.modules.unshift(rootNodeModules, 'node_modules');
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       zustand: path.join(rootNodeModules, 'zustand'),
       'zustand/middleware': path.join(rootNodeModules, 'zustand', 'middleware'),
     };
-    config.resolve.symlinks = false;
     return config;
   },
   async headers() {
@@ -36,5 +32,4 @@ const nextConfig = {
     ];
   },
 };
-
 module.exports = nextConfig;
